@@ -95,11 +95,8 @@ function home_posts_grid() {
 
 }
 
-
+//Add Class Uk-Overlay to containing element
 beans_add_attribute( 'beans_post_image_item_wrap', 'class', 'uk-overlay' );
-
-
-
 
 
 
