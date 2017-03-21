@@ -4,6 +4,13 @@
  */
 
 @utility-container-large-max-width: 1600px;
+@offcanvas-bar-width: 420px;
+@offcanvas-background: rgba(75, 122, 165, 0.0);
+@card-shadow: 0 1px 3px rgba(0,0,0,0.15);
+@accent-color: #12bea2;
+@base-link-color: @accent-color;
+@global-border-radius: 3px;
+@button-primary-background: @accent-color;
 
 .heading-font {
  font-family: 'Montserrat', sans-serif;
@@ -11,7 +18,8 @@
  line-height: 1.3;
  }
 
-h1, h2, h3, h4 {
+
+h1, h2, h3, h4, h5, h6 {
 .heading-font;
 }
 
@@ -19,8 +27,51 @@ h1.uk-article-title {
 .heading-font;
 font-size: 300%;
 }
-
 h2.uk-article-title {
 .heading-font;
 font-size: 250%;
+}
+
+.product_lead_text {
+  .heading-font;
+  font-size: 150%;
+}
+
+.product {
+  background-color: #FFFFFF;
+  box-shadow: @card-shadow;
+}
+
+.product_tag {
+  background-color: @accent-color;
+  .heading-font;
+}
+
+.tm-widget > .uk-panel-title {
+  background-color: @accent-color;
+  padding: 1em;
+  color: #FFF;
+}
+
+.top-footer {
+  background-color: @accent-color;
+}
+
+.newsletter-form{
+  background: @accent-color;
+}
+
+.main-footer {
+  background-color: #333333;
+  color: #FFF;
+}
+
+.top-footer, .main-footer, .bottom-footer {
+  padding: 3em 0 3em 0;
+
+}
+
+.bottom-footer {
+  background-color: #000;
+  color: #FFF;
 }

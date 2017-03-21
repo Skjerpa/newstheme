@@ -22,7 +22,23 @@ function load_uikit_components() {
 
 	beans_uikit_enqueue_components( array( 'flex', 'overlay' ) );
 	beans_uikit_enqueue_components( array( 'tooltip' ), 'add-ons' );
+	beans_uikit_enqueue_components( array( 'sticky' ), 'add-ons' );
 	beans_uikit_enqueue_components( array( 'scrollspy' ), 'core' );
+	beans_uikit_enqueue_components( array( 'table' ), 'core' );
+	beans_uikit_enqueue_components( array( 'description-list' ), 'core' );
+	beans_uikit_enqueue_components( array( 'article' ), 'core' );
+}
+
+// Enqueue the UIkit dynamic grid component.
+add_action( 'beans_uikit_enqueue_scripts', 'example_enqueue_grid_uikit_assets' );
+
+function example_enqueue_grid_uikit_assets() {
+
+	// Only apply to non singular view.
+	if ( !is_singular() ) {
+		beans_uikit_enqueue_components( array( 'grid' ), 'add-ons' );
+	}
+
 }
 
 // Remove this action and callback function if you are not adding CSS in the style.css file.
@@ -57,21 +73,6 @@ function beans_child_modify_post_content( $content ) {
 }
 
 
-
-
-// Enqueue the UIkit dynamic grid component.
-add_action( 'beans_uikit_enqueue_scripts', 'example_enqueue_grid_uikit_assets' );
-
-function example_enqueue_grid_uikit_assets() {
-
-	// Only apply to non singular view.
-	if ( !is_singular() ) {
-		beans_uikit_enqueue_components( array( 'grid' ), 'add-ons' );
-	}
-
-}
-
-
 // Display posts in a responsive dynamic grid.
 add_action( 'wp', 'home_posts_grid' );
 
@@ -95,9 +96,141 @@ function home_posts_grid() {
 
 }
 
-//Add Class Uk-Overlay to containing element
-beans_add_attribute( 'beans_post_image_item_wrap', 'class', 'uk-overlay' );
+// Remove primary menu and permanently enable offcanvas.
+beans_remove_action( 'beans_primary_menu' );
+beans_modify_action_hook( 'beans_primary_menu_offcanvas_button', 'beans_header' );
+beans_replace_attribute( 'beans_primary_menu_offcanvas_button', 'class', 'uk-hidden-large', 'uk-float-right' );
 
+//Remove default category display on grid posts
+beans_remove_action('beans_post_meta_categories');
+
+
+//registering Widget areas
+add_action( 'widgets_init', 'Header_widget_area' );
+function Header_widget_area() {
+ beans_register_widget_area( array(
+    'name' => 'Below Header',
+    'id' => 'below-header',
+    'description' => 'Header Widget',
+    'beans_type' => 'stack',
+
+ ) );
+}
+
+add_action( 'widgets_init', 'top_widget_area' );
+function top_widget_area() {
+ beans_register_widget_area( array(
+    'name' => 'Next to featured article',
+    'id' => 'top-area',
+    'description' => 'Top Widget Area',
+    'beans_type' => 'stack',
+
+ ) );
+}
+
+//Echo Below Header Widget Area
+add_action( 'beans_header_append_markup', 'below_header_widget_area' );
+
+function below_header_widget_area() {
+    echo beans_widget_area( 'below-header' );
+}
+
+//Remove padding above first post
+beans_add_attribute('beans_post_body', 'class', 'article-content');
+beans_add_attribute('beans_post_title', 'class', 'article-header');
+
+beans_add_attribute('beans_post_image', 'class', 'uk-overlay');
+
+add_action('beans_post_image_append_markup','add_card_badge');
+
+function add_card_badge() {
+	?>
+	<figcaption class="uk-overlay-panel uk-overlay-bottom uk-padding-remove card-tags">
+		<span class="uk-badge card-category ">Test</span>
+	</figcaption>
+	<?php
+}
+
+
+// 10 Adding a Footer Bottom Area for all pages
+// 10.1
+
+beans_modify_action_callback( 'beans_footer_partial_template', 'example_footer' );
+
+function example_footer() {
+    // Replace footer the footer structural markup.
+?>
+
+
+<footer class="tm-footer" role="contentinfo" itemscope="itemscope" itemtype="http://schema.org/WPFooter">
+<div class="top-footer">
+	<div class="uk-container uk-container-center">
+		<div class="uk-text-center newsletter-signup">
+			<h3 class="uk-contrast uk-align-center newsletter-signup-header">Meld deg på vårt nyhetsbrev og få informasjon når vi publiserer nye tester</h3>
+			<input type="text" placeholder="Din E-Post" class="uk-form-large uk-width-1-2" id="newsletter-signup-form">
+		</div>
+		</div>
+</div>
+<div class="main-footer">
+	<div class="uk-container">
+		<div class="uk-grid">
+		<div class="uk-width-1-3">
+			<h5 class="footer-heading">Følg oss på Facebook</h5>
+			<p>Vi publiserer alle nye tester via vår Facebookside. Følg oss for å holde deg oppdatert på nye tester.</p>
+		</div>
+		<div class="uk-width-1-3">
+			<h5 class="footer-heading">Populære tester</h5>
+			<ul class="uk-list">
+<?php
+global $post;
+$args = array( 'posts_per_page' => 5, 'orderby' => 'rand' );
+$rand_posts = get_posts( $args );
+foreach ( $rand_posts as $post ) :
+  setup_postdata( $post ); ?>
+	<li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+<?php endforeach;
+wp_reset_postdata(); ?>
+</ul>
+		</div>
+		<div class="uk-width-1-3">
+			<h5 class="footer-heading">Kategorier</h5>
+			 <?php
+			 $categories = get_categories( array(
+ 'orderby' => 'name',
+ 'parent'  => 0
+) );
+
+foreach ( $categories as $category ) {
+ printf( '<a class="category-list-item" href="%1$s">%2$s</a>',
+		 esc_url( get_category_link( $category->term_id ) ),
+		 esc_html( $category->name )
+ );
+}
+			 ?>
+			 <h5 class="footer-heading">Hashtags</h5>
+
+			 <?php
+			 if(get_the_tag_list()) {
+			     echo get_the_tag_list('<ul class="tag-list"><li class="tag">','</li><li class="tag">','</li></ul>');
+			 }
+			 ?>
+		</div>
+
+	</div>
+	</div>
+	</div>
+
+</div>
+<div class="bottom-footer">
+	<div class="uk-container">
+		<div class="uk-grid-width-1-2 uk-container-center"><h5>Test</h5></div>
+	</div>
+
+</div>
+</footer>
+
+<?php
+}
 
 
 //Add Google Fonts
