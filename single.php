@@ -4,11 +4,8 @@
 add_action( 'beans_post_after_markup', 'beans_child_show_products' );
 function beans_child_show_products() {
     ?>
-
-
     <div class="products">
       <?php if( have_rows('product') ): ?>
-
 
       	<?php while( have_rows('product') ): the_row();
           // vars
@@ -24,6 +21,7 @@ function beans_child_show_products() {
         ?>
 
           <div class="product uk-margin-large-bottom" data-uk-scrollspy="{cls:'uk-animation-fade'}">
+            <h3>Testvinner</h3>
               <figure class="uk-overlay">
                 <img src="<?php echo $product_image; ?>" width="" height="" alt="">
                 <figcaption class="uk-overlay-panel uk-flex uk-flex-top">
@@ -68,6 +66,7 @@ beans_modify_action_hook( 'beans_post_image', 'beans_post_title_before_markup' )
 
 // Remove the post meta categories.
 beans_remove_action( 'beans_post_meta_categories' );
+beans_remove_action('beans_post_navigation');
 
 
 

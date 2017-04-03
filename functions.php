@@ -74,35 +74,63 @@ function beans_child_modify_post_content( $content ) {
 
 
 // Display posts in a responsive dynamic grid.
-add_action( 'wp', 'home_posts_grid' );
+add_action( 'wp', 'example_posts_grid' );
+/**
+ * Display posts in a responsive grid.
+ */
+function example_posts_grid() {
+    // Only apply to homepage
+    if ( is_home() ) {
+        // Add grid.
+        beans_wrap_inner_markup( 'beans_content', 'example_posts_grid', 'div', array(
+            'class'               => 'uk-grid uk-grid-match',
+            'data-uk-grid-margin' => '',
+        ) );
+        beans_wrap_markup( 'beans_post', 'example_post_grid_column', 'div' );
 
-function home_posts_grid() {
-
-	// Only apply to non singular view.
-	if ( !is_singular() ) {
-
-		// Add grid.
-		beans_wrap_inner_markup( 'beans_content', 'beans_child_posts_grid', 'div', array(
-			'data-uk-grid' => '{gutter: 20}'
-		) );
-		beans_wrap_markup( 'beans_post', 'beans_child_post_grid_column', 'div', array(
-			'class' => 'uk-width-large-1-2 uk-width-medium-1-2'
-		) );
-
-		// Move the posts pagination after the new grid markup.
-		beans_modify_action_hook( 'beans_posts_pagination', 'beans_child_posts_grid_after_markup' );
-
-	}
-
+        // Move the posts pagination after the new grid markup.
+        beans_modify_action_hook( 'beans_posts_pagination', 'example_posts_grid_after_markup' );
+    }
 }
+
+add_filter( 'example_post_grid_column_attributes', 'example_post_grid_column_attributes' );
+/**
+ * Add post grid columns adaptive class.
+ *
+ * @param array $attributes Array of post grid column HTML attributes.
+ *
+ * @return array Array of post grid column HTML attributes.
+ */
+function example_post_grid_column_attributes( $attributes ) {
+    static $index = 0;
+
+    // Add space after current class if it exists.
+    $attributes['class'] = isset( $attributes['class'] ) ? $attributes['class'] . ' ' : null;
+
+    // Add adaptive grid class.
+    $columns = ( 0 === $index % 5 ) ? '2-3' : '1-3';
+    $attributes['class'] .= "uk-width-large-{$columns} uk-width-medium-1-1";
+
+    // Bump post index.
+    $index++;
+
+    return $attributes;
+}
+
+
 
 // Remove primary menu and permanently enable offcanvas.
 beans_remove_action( 'beans_primary_menu' );
 beans_modify_action_hook( 'beans_primary_menu_offcanvas_button', 'beans_header' );
 beans_replace_attribute( 'beans_primary_menu_offcanvas_button', 'class', 'uk-hidden-large', 'uk-float-right' );
 
-//Remove default category display on grid posts
+//Remove default output on Tags
+beans_remove_output('beans_post_meta_tags_prefix');
+beans_add_attribute('beans_post_meta_tags', 'class', 'nt-tags');
+
 beans_remove_action('beans_post_meta_categories');
+
+
 
 
 //registering Widget areas
@@ -146,7 +174,7 @@ add_action('beans_post_image_append_markup','add_card_badge');
 function add_card_badge() {
 	?>
 	<figcaption class="uk-overlay-panel uk-overlay-bottom uk-padding-remove card-tags">
-		<span class="uk-badge card-category ">Test</span>
+		<span class="uk-badge card-category "><?php beans_post_meta_categories(); ?></span>
 	</figcaption>
 	<?php
 }
@@ -158,7 +186,6 @@ function add_card_badge() {
 beans_modify_action_callback( 'beans_footer_partial_template', 'example_footer' );
 
 function example_footer() {
-    // Replace footer the footer structural markup.
 ?>
 
 
@@ -167,7 +194,8 @@ function example_footer() {
 	<div class="uk-container uk-container-center">
 		<div class="uk-text-center newsletter-signup">
 			<h3 class="uk-contrast uk-align-center newsletter-signup-header">Meld deg på vårt nyhetsbrev og få informasjon når vi publiserer nye tester</h3>
-			<input type="text" placeholder="Din E-Post" class="uk-form-large uk-width-1-2" id="newsletter-signup-form">
+			<input type="text" placeholder="Din E-Post" class="uk-form-large uk-width-4-6" id="newsletter-signup-form">
+			<button class="uk-button">Subscribe</button>
 		</div>
 		</div>
 </div>
@@ -220,17 +248,39 @@ foreach ( $categories as $category ) {
 	</div>
 	</div>
 
-</div>
 <div class="bottom-footer">
-	<div class="uk-container">
-		<div class="uk-grid-width-1-2 uk-container-center"><h5>Test</h5></div>
+	<div class="uk-width-1-2 uk-container-center">
+		<div class="uk-text-center">
+			<svg width="68" height="81" viewBox="0 0 68 81" xmlns="http://www.w3.org/2000/svg">
+  <title>
+    Group 2
+  </title>
+  <g fill="#76C5BD" fill-rule="evenodd">
+    <path d="M65.3.5H2.8c-1 0-2 1-2 2v20c0 1.2 1 2 2 2h7c.7 0 1.4-.4 1.7-1v-.6l2.5-9h40l2.5 9v.4c.4.7 1 1.2 2 1.2h6.8c1 0 2-1 2-2v-20c0-1.2-1-2-2-2M52 70h-.2l-9-2.8v-39c0-1-.7-2-1.8-2H27.7c-.7 0-1 .3-1.2.5L15.3 38c-.4.4-.6 1-.6 1.4 0 1 1 2 2 2h8.5v25.8l-8.8 3c-1 0-1.6 1-1.6 1.8v6c0 1 1 2 2 2h34.6c1 0 2-1 2-2v-6c0-1-.6-1.7-1.5-2"/>
+  </g>
+</svg>
+			<h5>Best-i-test.net eies og drifes av Netpixelmedia AS</h5>
+			<?php wp_nav_menu( array( 'theme_location' => 'bottom_footer_menu' ) ); ?>
+		</div>
+		</div>
 	</div>
 
-</div>
 </footer>
 
 <?php
 }
+
+// Register secondary menu.
+add_action( 'after_setup_theme', 'footer_register_menu' );
+function footer_register_menu() {
+    register_nav_menus( array(
+        'bottom_footer_menu' => __( 'Bottom Footer Menu', 'tm-beans' ),
+    ) );
+}
+
+
+
+
 
 
 //Add Google Fonts
