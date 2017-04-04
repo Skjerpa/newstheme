@@ -103,13 +103,18 @@ add_filter( 'example_post_grid_column_attributes', 'example_post_grid_column_att
  */
 function example_post_grid_column_attributes( $attributes ) {
     static $index = 0;
+		static $count = 0;
 
     // Add space after current class if it exists.
     $attributes['class'] = isset( $attributes['class'] ) ? $attributes['class'] . ' ' : null;
 
+		// Classes to alternate throurgh - add more if you need more then two
+		$classes = array('uk-width-large-2-3', 'uk-width-large-1-3');
+
     // Add adaptive grid class.
-    $columns = ( 0 === $index % 5 ) ? '2-3' : '1-3';
-    $attributes['class'] .= "uk-width-large-{$columns} uk-width-medium-1-1";
+		$count = ++$count % count($classes);
+    $columns = $classes[$count];
+    $attributes['class'] .= "{$columns} uk-width-medium-1-1";
 
     // Bump post index.
     $index++;
